@@ -2,20 +2,28 @@
 
 ## Prisma Client isn't generated on deploying to Vercel
 
-The essence of the problem seems to be that Vercel ships a cached version of node_modules with the functions and in some situations the cached node_modules doesn't contain the generated Prisma Client (from the `postinstall` script in Prisma Client or the [`build`](./package.json#L7) script of the actual project). There are certain circumstances that cause this cache to get busted, like updating the `package-lock.json`.
+The essence of the problem seems to be that Vercel ships a cached version of `node_modules` with the functions and in some situations the cached `node_modules` doesn't contain the generated Prisma Client (from the `postinstall` script in Prisma Client or the [`build`](./package.json#L7) script of the project). There are certain circumstances that cause this cache to get busted, like updating the `package-lock.json`.
 
 This is a problem when making changes to the Prisma schema. For example, when you add a new field, migrate the database, and update one of your functions to use the new field. When the changes are committed and pushed, Vercel triggers a build that loads the node_modules folder from cache.
 
 Original issue: https://github.com/prisma/prisma/issues/5175
 
-## Reproduction details
+## How to reproduce
 
-In this repo, the following [commit](https://github.com/2color/vercel-prisma-reproduction/commit/4f2194cc1b566dcfba3abe94dc0090fa33432bbd) adds a new field to the Prisma schema and uses it in the `api/feed.js` serverless function. 
+1. Deploy this repository
+2. Make a change to the Prisma schema, make use of that change in the `api/feed.js` function
+3. Commit and push the change
+4. Try calling the `api/feed` endpoint of the newly deployed version.
+
+### Example
+
+In this repo, the following [commit](https://github.com/2color/vercel-prisma-reproduction/commit/4f2194cc1b566dcfba3abe94dc0090fa33432bbd) adds a new field to the Prisma schema and uses it in the `api/feed.js` serverless function.
 
 Prisma will generate the Prisma Client code to `node_modules` when `prisma generate` is called.
 
-Here's the Vercel build log for the commit: 
-```
+Here's the Vercel build log for the commit:
+
+````
 14:39:11.323  	Cloning github.com/2color/vercel-prisma-reproduction (Branch: main, Commit: 4f2194c)
 14:39:12.008  	Cloning completed in 685ms
 14:39:12.010  	Analyzing source code...
@@ -113,12 +121,12 @@ Here's the Vercel build log for the commit:
 14:40:01.074  	Uploading build cache [50.35 MB]...
 14:40:03.207  	Build cache uploaded: 2130.370ms
 14:40:03.426  	Done with "package.json"
-```
+````
 
 The problem shows up when the `/api/feed` endpoint the following error is logged:
 
 ```
-2021-01-19T14:03:41.740Z	e39cbfce-4e11-4491-bb72-e43820413e09	ERROR	PrismaClientValidationError: 
+2021-01-19T14:03:41.740Z	e39cbfce-4e11-4491-bb72-e43820413e09	ERROR	PrismaClientValidationError:
 Unknown field `newfield` for select statement on model Post.
     at Document.validate (/var/task/node_modules/@prisma/client/runtime/index.js:76024:19)
     at NewPrismaClient._executeRequest (/var/task/node_modules/@prisma/client/runtime/index.js:77790:17)
@@ -132,4 +140,3 @@ Unknown field `newfield` for select statement on model Post.
 ```
 
 This is due to latest generated Prisma Client not being shipped/deployed in the `/api/feed` function.
-
