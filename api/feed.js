@@ -4,7 +4,12 @@ import { PrismaClientKnownRequestError } from '@prisma/client'
 export default async function handle(req, res) {
   try {
     const posts = await prisma.post.findMany({
-      include: { author: true },
+      select: {
+        id: true,
+        title: true,
+        createdAt: true,
+        author: true,
+      },
       orderBy: [{ id: 'desc' }],
       take: 25,
     })
