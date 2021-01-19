@@ -16,4 +16,4 @@ flow-typed
 yarn.lock
 .next
 .vscode/
-.vercel/
+.vercel
