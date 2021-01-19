@@ -7,6 +7,7 @@ export default async function handle(req, res) {
       select: {
         id: true,
         title: true,
+        newfield: true,
         createdAt: true,
         author: true,
       },
