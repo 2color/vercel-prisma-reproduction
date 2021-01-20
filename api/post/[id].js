@@ -25,6 +25,7 @@ async function handleGET(postId, res) {
     })
     res.json(post)
   } catch (error) {
+    console.error(error)
     if (error instanceof PrismaClientKnownRequestError) {
       res.status(422).json({ error: error.message, code: error.code })
     } else {
@@ -41,6 +42,7 @@ async function handleDELETE(postId, res) {
     })
     res.json(post)
   } catch (error) {
+    console.error(error)
     if (error instanceof PrismaClientKnownRequestError) {
       res.status(422).json({ error: error.message, code: error.code })
     } else {

@@ -11,7 +11,7 @@ export default async function handle(req, res) {
         createdAt: true,
         author: true,
       },
-      orderBy: [{ id: 'desc' }],
+      orderBy: [{ createdAt: 'desc' }],
       take: 25,
     })
     res.json(posts)

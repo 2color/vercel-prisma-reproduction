@@ -17,6 +17,7 @@ export default async function handle(req, res) {
       })
       res.json(result)
     } catch (error) {
+      console.error(error)
       if (error instanceof PrismaClientKnownRequestError) {
         res.status(422).json({ error: error.message, code: error.code })
       } else {
